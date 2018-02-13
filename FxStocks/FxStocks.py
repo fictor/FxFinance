@@ -1,6 +1,3 @@
-
-stock_list=['AAPL','AMZN','MSFT','SHOP','A','SNE']
-
 from Downloader.QuandlAccess import QuandlAccess
 from Downloader.GoogleFinanceAccess import GoogleFinanceAccess
 from Downloader.FixYahooFinanceAccess import FixYahooFinanceAccess
@@ -11,6 +8,7 @@ import datetime
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import matplotlib.cbook as cbook
+from matplotlib.widgets import Cursor
 
 days = mdates.DayLocator(interval=7)   # every week
 years = mdates.YearLocator()   # every year
@@ -21,6 +19,8 @@ class FxStocks():
     def __init__(self,quandl_key):
         self.start_date = (2018, 1, 1)
         self.quandl_key = quandl_key
+        with open('stock_list.txt', 'r') as stock_list_file:
+            self.stock_list = stock_list_file.read().splitlines()
 
     def load_csv(self):
         self.stock_df = pd.DataFrame.from_csv('stock.csv')
@@ -30,7 +30,7 @@ class FxStocks():
         #for stock in stock_list:
 
         #qa = QuandlAccess(self.quandl_key)
-        #self.stock_df = qa.quandl_stocks(stock_list,self.start_date)
+        #self.stock_df = qa.quandl_stocks(self.stock_list,self.start_date)
 
         ## Return empty dataframe for now
         #gfa = GoogleFinanceAccess()
@@ -39,7 +39,7 @@ class FxStocks():
 
 
         fyf = FixYahooFinanceAccess()
-        self.stock_df = fyf.get_stock_test(stock_list,self.start_date)
+        self.stock_df = fyf.get_stock_test(self.stock_list,self.start_date)
         #
         #self.stock_df = self.stock_df[self.used_column].div(self.stock_df[self.used_column].sum(), axis=0).multiply(100)
 
@@ -61,6 +61,9 @@ class FxStocks():
         print_diff_over_period = self.stock_df[self.used_column].iloc[-1] - self.stock_df[self.used_column].iloc[1]
         print(print_diff_over_period)
 
+        print('Getting SUM')
+        print(self.stock_df[self.used_column].sum())
+
     def plot(self):
         stock_df = self.stock_df
         ##print(stock_df.head(6))
@@ -72,7 +75,7 @@ class FxStocks():
         print(self.used_column)
         index = 0
         for single_stock_df_column in self.used_column:
-            cur_plot = plt.plot(stock_df.index, stock_df[single_stock_df_column], label=stock_list[index]) # , stock_df['Open']
+            cur_plot = plt.plot(stock_df.index, stock_df[single_stock_df_column], label=self.stock_list[index]) # , stock_df['Open']
             index +=1
         plt.plot(stock_df.index, stock_df[self.used_column].mean(axis='columns'), label='mean')
         plt.legend(shadow=True, fancybox=True)
@@ -82,10 +85,8 @@ class FxStocks():
         #ax.plot(date, r.adj_close)
         # format the ticks
 
-        #ax.xaxis.set_major_locator(years)
         ax.xaxis.set_major_locator(months)
         ax.xaxis.set_major_formatter(yearsFmt)
-        #ax.xaxis.set_minor_locator(months)
         ax.xaxis.set_minor_locator(days)
 
         #ax.xaxis.set_major_locator(mdates.MinuteLocator(interval=15))   #to get a tick every 15 minutes
@@ -113,6 +114,9 @@ class FxStocks():
         plt.ylabel('Open Price (\%)')
 
         plt.tight_layout()
+
+        # set useblit = True on gtkagg for enhanced performance
+        cursor = Cursor(ax, useblit=True, color='red', linewidth=2)
 
         plt.show()
 
