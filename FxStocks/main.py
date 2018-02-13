@@ -9,11 +9,12 @@ if __name__ == "__main__":
         quandl_key = quandl_key_file.read()
     print ('quandl_key = ' + quandl_key)
 
+
     fs = FxStocks(quandl_key)
-    fs.load_csv()
+    #fs.load_csv()
     
-    #fs.download()
-    #fs.to_csv()
+    fs.download()
+    fs.to_csv()
 
     fs.process()
     

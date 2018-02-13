@@ -1,7 +1,10 @@
 
-stock_list=['AAPL','AMZN','MSFT']
+stock_list=['AAPL','AMZN','MSFT','SHOP','A','SNE']
 
 from Downloader.QuandlAccess import QuandlAccess
+from Downloader.GoogleFinanceAccess import GoogleFinanceAccess
+from Downloader.FixYahooFinanceAccess import FixYahooFinanceAccess
+
 import pandas as pd
 
 import datetime
@@ -15,7 +18,6 @@ months = mdates.MonthLocator()  # every month
 yearsFmt = mdates.DateFormatter('%Y/%m')
 
 class FxStocks():
-
     def __init__(self,quandl_key):
         self.start_date = (2018, 1, 1)
         self.quandl_key = quandl_key
@@ -26,11 +28,30 @@ class FxStocks():
     def download(self):
         stock_df_list = []
         #for stock in stock_list:
-        QuandlAccess(self.quandl_key)
-        self.stock_df = QuandlAccess.quandl_stocks(stock_list,self.start_date)
+
+        #qa = QuandlAccess(self.quandl_key)
+        #self.stock_df = qa.quandl_stocks(stock_list,self.start_date)
+
+        ## Return empty dataframe for now
+        #gfa = GoogleFinanceAccess()
+        ##self.stock_df = gfa.google_finance_stocks(stock_list,self.start_date)
+        #self.stock_df = gfa.example_2()
+
+
+        fyf = FixYahooFinanceAccess()
+        self.stock_df = fyf.get_stock_test(stock_list,self.start_date)
+        #
+        #self.stock_df = self.stock_df[self.used_column].div(self.stock_df[self.used_column].sum(), axis=0).multiply(100)
+
+        #dd = DataDownloader(None)
+        #source = 'Bloomberg'
+        #vendor_ticker = 'GBPUSD BGN Curncy'
+        #ticker = 'GBPUSD' # will use in plot titles later (and for creating Plotly URL)
+        #self.stock_df = dd.download_time_series(vendor_ticker, ticker, self.start_date, source)
 
     def process(self):
         self.used_column = [s for s in self.stock_df.columns.values if "Open" in s and not 'Adj' in s]
+        #pass
         #print(self.stock_df.tail())
 
     def get_diff_over_period(self):
@@ -70,11 +91,8 @@ class FxStocks():
         #ax.xaxis.set_major_locator(mdates.MinuteLocator(interval=15))   #to get a tick every 15 minutes
         #ax.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))     #optional formatting 
 
-
         datemin = datetime.date(*self.start_date)
         datemax = datetime.date.today()
-        #datemin = datetime.date(date.min().year, 1, 1)
-        #datemax = datetime.date(date.max().year + 1, 1, 1)
         ax.set_xlim(datemin, datemax)
 
         ax.format_xdata = mdates.DateFormatter('%Y-%m-%d')
@@ -95,22 +113,6 @@ class FxStocks():
         plt.ylabel('Open Price (\%)')
 
         plt.tight_layout()
-
-        ## Pad margins so that markers don't get clipped by the axes
-        #plt.margins(0.2)
-        #
-        ## Tweak spacing to prevent clipping of tick-labels
-        #plt.subplots_adjust(bottom=0.3) #0.15)
-
-        #plt.tight_layout()
-        #plt.subplot(2, 1, 2)
-        #plt.plot(stock_df.index, stock_df['Ask Average'])
-        #
-        #
-        #plt.xlabel('\n Year')
-        #plt.ylabel('Avg. Ask Price \n')
-
-        #legend(framealpha=0.5)
 
         plt.show()
 
