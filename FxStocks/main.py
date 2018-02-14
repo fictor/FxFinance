@@ -14,7 +14,7 @@ if __name__ == "__main__":
     #fs.load_csv()
     
     fs.download()
-    fs.to_csv()
+    #fs.to_csv()
 
     fs.process()
     

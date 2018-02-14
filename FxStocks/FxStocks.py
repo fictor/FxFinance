@@ -75,7 +75,7 @@ class FxStocks():
         print(self.used_column)
         index = 0
         for single_stock_df_column in self.used_column:
-            cur_plot = plt.plot(stock_df.index, stock_df[single_stock_df_column], label=self.stock_list[index]) # , stock_df['Open']
+            cur_plot = plt.plot(stock_df.index, stock_df[single_stock_df_column], label=single_stock_df_column[1])#)label=self.stock_list[index]) # , stock_df['Open']
             index +=1
         plt.plot(stock_df.index, stock_df[self.used_column].mean(axis='columns'), label='mean')
         plt.legend(shadow=True, fancybox=True)
