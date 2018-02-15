@@ -35,10 +35,15 @@ class FixYahooFinanceAccess():
         #data = pd.concat([data1, data2, data3])
 
         # download Panel
-        try:
-            data = pdr.get_data_yahoo(symbols, start=start_date, end=end_date, as_panel = False)
-        except ValueError:  #raised if `y` is empty.
-            pass
+        data = None
+        retry = 0
+        max_retry = 5
+        while retry < max_retry and not isinstance(data, pd.DataFrame):
+            try:
+                data = pdr.get_data_yahoo(symbols, start=start_date, end=end_date, as_panel = False)
+            except ValueError:  #raised if `y` is empty.
+                data = None
+            retry += 1
 
         # percentage of total
         #data = (data.div(data.sum())).multiply(100)

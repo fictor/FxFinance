@@ -3,6 +3,7 @@ from Downloader.GoogleFinanceAccess import GoogleFinanceAccess
 from Downloader.FixYahooFinanceAccess import FixYahooFinanceAccess
 
 import pandas as pd
+import datetime 
 
 import datetime
 import matplotlib.pyplot as plt
@@ -10,14 +11,25 @@ import matplotlib.dates as mdates
 import matplotlib.cbook as cbook
 from matplotlib.widgets import Cursor
 
-days = mdates.DayLocator(interval=7)   # every week
+half_days = mdates.HourLocator(interval=12)   # every week
+days = mdates.DayLocator()   # every week
+weeks = mdates.DayLocator(interval=7)   # every week
 years = mdates.YearLocator()   # every year
 months = mdates.MonthLocator()  # every month
+daysFmt = mdates.DateFormatter('%d/%hd')
+monthsFmt = mdates.DateFormatter('%m/%w')
 yearsFmt = mdates.DateFormatter('%Y/%m')
 
 class FxStocks():
     def __init__(self,quandl_key):
-        self.start_date = (2018, 1, 1)
+        self.start_date_tuple = (2018, 2, 7)
+        self.start_date = datetime.date(*self.start_date_tuple) #*start_date)
+        self.end_date = datetime.date.today()
+        self.diff_date = self.end_date - self.start_date
+        if (self.diff_date.days < 60):
+            self.show_days = True
+        else:
+            self.show_days = False
         self.quandl_key = quandl_key
         with open('stock_list.txt', 'r') as stock_list_file:
             self.stock_list = stock_list_file.read().splitlines()
@@ -30,7 +42,7 @@ class FxStocks():
         #for stock in stock_list:
 
         #qa = QuandlAccess(self.quandl_key)
-        #self.stock_df = qa.quandl_stocks(self.stock_list,self.start_date)
+        #self.stock_df = qa.quandl_stocks(self.stock_list,self.start_date_tuple)
 
         ## Return empty dataframe for now
         #gfa = GoogleFinanceAccess()
@@ -39,7 +51,7 @@ class FxStocks():
 
 
         fyf = FixYahooFinanceAccess()
-        self.stock_df = fyf.get_stock_test(self.stock_list,self.start_date)
+        self.stock_df = fyf.get_stock_test(self.stock_list,self.start_date_tuple)
         #
         #self.stock_df = self.stock_df[self.used_column].div(self.stock_df[self.used_column].sum(), axis=0).multiply(100)
 
@@ -84,19 +96,24 @@ class FxStocks():
         #fig, ax = plt.subplots()
         #ax.plot(date, r.adj_close)
         # format the ticks
+        if self.show_days:
+            ax.xaxis.set_major_locator(days)
+            ax.xaxis.set_minor_locator(half_days)
+            ax.xaxis.set_major_formatter(daysFmt)
+        else:
+            ax.xaxis.set_major_locator(months)
+            ax.xaxis.set_minor_locator(weeks)
+            ax.xaxis.set_major_formatter(monthsFmt)
+        ax.set_xlim(self.start_date, self.end_date)
 
-        ax.xaxis.set_major_locator(months)
-        ax.xaxis.set_major_formatter(yearsFmt)
-        ax.xaxis.set_minor_locator(days)
+        ax.format_xdata = mdates.DateFormatter('%Y-%m-%d')
 
         #ax.xaxis.set_major_locator(mdates.MinuteLocator(interval=15))   #to get a tick every 15 minutes
         #ax.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))     #optional formatting 
 
-        datemin = datetime.date(*self.start_date)
-        datemax = datetime.date.today()
-        ax.set_xlim(datemin, datemax)
+        #datemin = datetime.date(*self.start_date_tuple)
+        #datemax = datetime.date.today()
 
-        ax.format_xdata = mdates.DateFormatter('%Y-%m-%d')
 
         # format the coords message box
         #def price(x):
