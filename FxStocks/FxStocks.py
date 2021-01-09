@@ -1,5 +1,3 @@
-from Downloader.QuandlAccess import QuandlAccess
-from Downloader.GoogleFinanceAccess import GoogleFinanceAccess
 from Downloader.FixYahooFinanceAccess import FixYahooFinanceAccess
 
 import pandas as pd
@@ -21,8 +19,8 @@ monthsFmt = mdates.DateFormatter('%m/%w')
 yearsFmt = mdates.DateFormatter('%Y/%m')
 
 class FxStocks():
-    def __init__(self,quandl_key):
-        self.start_date_tuple = (2018, 2, 7)
+    def __init__(self):
+        self.start_date_tuple = (2020, 12, 15)
         self.start_date = datetime.date(*self.start_date_tuple) #*start_date)
         self.end_date = datetime.date.today()
         self.diff_date = self.end_date - self.start_date
@@ -30,7 +28,6 @@ class FxStocks():
             self.show_days = True
         else:
             self.show_days = False
-        self.quandl_key = quandl_key
         with open('stock_list.txt', 'r') as stock_list_file:
             self.stock_list = stock_list_file.read().splitlines()
 
@@ -38,33 +35,11 @@ class FxStocks():
         self.stock_df = pd.DataFrame.from_csv('stock.csv')
 
     def download(self):
-        stock_df_list = []
-        #for stock in stock_list:
-
-        #qa = QuandlAccess(self.quandl_key)
-        #self.stock_df = qa.quandl_stocks(self.stock_list,self.start_date_tuple)
-
-        ## Return empty dataframe for now
-        #gfa = GoogleFinanceAccess()
-        ##self.stock_df = gfa.google_finance_stocks(stock_list,self.start_date)
-        #self.stock_df = gfa.example_2()
-
-
         fyf = FixYahooFinanceAccess()
         self.stock_df = fyf.get_stock_test(self.stock_list,self.start_date_tuple)
-        #
-        #self.stock_df = self.stock_df[self.used_column].div(self.stock_df[self.used_column].sum(), axis=0).multiply(100)
-
-        #dd = DataDownloader(None)
-        #source = 'Bloomberg'
-        #vendor_ticker = 'GBPUSD BGN Curncy'
-        #ticker = 'GBPUSD' # will use in plot titles later (and for creating Plotly URL)
-        #self.stock_df = dd.download_time_series(vendor_ticker, ticker, self.start_date, source)
 
     def process(self):
         self.used_column = [s for s in self.stock_df.columns.values if "Open" in s and not 'Adj' in s]
-        #pass
-        #print(self.stock_df.tail())
 
     def get_diff_over_period(self):
         print_diff_over_period = self.stock_df.last_valid_index() - self.stock_df.first_valid_index()
@@ -78,20 +53,17 @@ class FxStocks():
 
     def plot(self):
         stock_df = self.stock_df
-        ##print(stock_df.head(6))
-        ##print(stock_df.tail(6))
 
         ax = plt.subplot(1, 1, 1)
-        print(list(stock_df.columns.values))
-        #print(list(stock_df))
-        print(self.used_column)
+        # print(list(stock_df.columns.values))
+        # print(self.used_column)
         index = 0
         for single_stock_df_column in self.used_column:
             cur_plot = plt.plot(stock_df.index, stock_df[single_stock_df_column], label=single_stock_df_column[1])#)label=self.stock_list[index]) # , stock_df['Open']
             index +=1
         plt.plot(stock_df.index, stock_df[self.used_column].mean(axis='columns'), label='mean')
         plt.legend(shadow=True, fancybox=True)
-        plt.title('Stock Analysis') #self.used_column
+        plt.title('Stock Analysis')
 
         #fig, ax = plt.subplots()
         #ax.plot(date, r.adj_close)
@@ -128,13 +100,14 @@ class FxStocks():
 
         #plt.xticks(stock_df.index, rotation='vertical')
         plt.xlabel('Date')
-        plt.ylabel('Open Price (\%)')
+        plt.ylabel(r'Open Price (\%)')
 
         plt.tight_layout()
 
         # set useblit = True on gtkagg for enhanced performance
         cursor = Cursor(ax, useblit=True, color='red', linewidth=2)
 
+        print("Show")
         plt.show()
 
     def to_csv(self):
